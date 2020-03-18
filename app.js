@@ -9,6 +9,7 @@ const outputPath = path.join(OUTPUT_DIR, "team.html");
 const render = require("./lib/htmlRenderer");
 // Write code to use inquirer to gather information about the development team members,
 // and to create objects for each team member (using the correct classes as blueprints!)
+let employees = []
 function createTeam() {
     return inquirer.prompt([
         {
@@ -44,8 +45,8 @@ function createTeam() {
             case "Intern":
                 createIntern(data)
                 break;
-
-            default:
+            default: 
+            finishedCreatingTeam()
                 break;
         }
     })
@@ -57,13 +58,23 @@ function createEngineer(employeeInfo) {
             type: "input",
             name: "github",
             message: "What is the GitHub?"
+        }, 
+        {
+            type: "confirm",
+            name: "moreEmployees",
+            message: "Anyone Else?"
         }
     ]).then((data) => {
         const { name, id, email } = employeeInfo
         const { github } = data
 
         let newEngineer = new Engineer (name, id, email, github)
-        console.log(newEngineer)
+        employees.push(newEngineer)
+        if (data.moreEmployees) {
+            createTeam()
+        } else {
+            finishedCreatingTeam()
+        }
     })
 }
 
@@ -73,13 +84,23 @@ function createManager(employeeInfo) {
         type: "input",
         name: "officeNumber",
         message: "What is the office number?"
+    }, 
+    {
+        type: "confirm",
+        name: "moreEmployees",
+        message: "Anyone Else?"
     }
     ]).then((data) => {
         const {name, id, email} = employeeInfo
         const { officeNumber } = data
 
         let newManager = new Manager (name, id, email, officeNumber)
-        console.log(newManager)
+        employees.push(newManager)
+        if (data.moreEmployees) {
+            createTeam()
+        } else {
+            finishedCreatingTeam()
+        }
     })
 }
 
@@ -89,14 +110,32 @@ function createIntern(employeeInfo) {
         type: "input",
         name: "school",
         message: "What is the school?"
+    }, 
+    {
+        type: "confirm",
+        name: "moreEmployees",
+        message: "Anyone Else?"
     }
 ]).then((data) => {
     const {name, id, email} = employeeInfo
     const { school } = data
 
     let newIntern = new Intern (name, id, email, school)
-    console.log(newIntern)
+    employees.push(newIntern)
+    if (data.moreEmployees) {
+        createTeam()
+    } else {
+        finishedCreatingTeam()
+    }
 })
+}
+
+function finishedCreatingTeam(){
+    fs.writeFile(outputPath,render(employees), (err,data)=>{
+        console.log("Success!")
+
+    })
+//    let x = render(employees)
 }
 
 createTeam()
